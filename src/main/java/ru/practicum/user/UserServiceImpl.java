@@ -2,7 +2,7 @@ package ru.practicum.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.exception.ConflictExeption;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto userDto) {
         repository.findByEmail(userDto.getEmail())
                 .ifPresent(u -> {
-                    throw new ConflictExeption("Email already exists");
+                    throw new ConflictException("Email already exists");
                 });
 
         User user = UserMapper.toUser(userDto);
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
             repository.findByEmail(userDto.getEmail())
                     .ifPresent(u -> {
-                        throw new ConflictExeption("Email already exists");
+                        throw new ConflictException("Email already exists");
                     });
             existingUser.setEmail(userDto.getEmail());
         }

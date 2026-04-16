@@ -1,5 +1,8 @@
 package ru.practicum.item;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
