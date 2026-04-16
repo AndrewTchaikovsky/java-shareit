@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LaterApplication {
+public class ShareIt {
     public static void main(String[] args) {
-        SpringApplication.run(LaterApplication.class, args);
+        SpringApplication.run(ShareIt.class, args);
 
     }
 }
