@@ -1,7 +1,6 @@
 package ru.practicum.user;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class User {
