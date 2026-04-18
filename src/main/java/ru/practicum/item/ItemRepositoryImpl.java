@@ -61,5 +61,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         if (!item.getOwnerId().equals(userId)) {
             throw new AccessDeniedException("Only owner can edit item");
         }
+
+        items.remove(itemId);
     }
 }
