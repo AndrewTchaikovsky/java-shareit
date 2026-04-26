@@ -1,4 +1,4 @@
-package ru.practicum.comment;
+package ru.practicum.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

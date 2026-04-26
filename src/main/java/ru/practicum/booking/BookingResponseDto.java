@@ -1,20 +1,21 @@
 package ru.practicum.booking;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.item.ItemDto;
+import ru.practicum.user.UserDto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookingDto {
+public class BookingResponseDto {
     private Long id;
-    private Date start;
-    private Date end;
-    private Long itemId;
-    private Long bookerId;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private ItemDto item;
+    private UserDto booker;
     private Status status;
 }

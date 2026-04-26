@@ -1,8 +1,7 @@
-package ru.practicum.comment;
+package ru.practicum.item;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import ru.practicum.item.Item;
 import ru.practicum.user.User;
 
 import java.time.LocalDateTime;
@@ -19,7 +18,7 @@ public class Comment {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id",  nullable = false)
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
