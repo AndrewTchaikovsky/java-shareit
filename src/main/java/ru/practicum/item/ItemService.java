@@ -3,16 +3,18 @@ package ru.practicum.item;
 import java.util.List;
 
 public interface ItemService {
-    List<Item> getItems(long userId);
+    List<ItemOwnerDto> getItems(long userId);
 
-    Item addNewItem(long userId, Item item);
+    ItemDto addNewItem(long userId, ItemDto dto);
 
-    Item getItemById(long itemId);
+    ItemOwnerDto getItemById(long userId, long itemId);
 
-    Item updateItem(long userId, long itemId, Item item);
+    ItemDto updateItem(long userId, long itemId, ItemDto dto);
 
-    List<Item> searchItems(String text);
+    List<ItemDto> searchItems(String text);
 
     void deleteItem(long userId, long itemId);
+
+    CommentDto addComment(Long userId, Long itemId, String text);
 
 }
