@@ -34,8 +34,7 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("Start must be before end");
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        User user = findUserOrThrow(userId);
 
         Item item = itemRepository.findById(dto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Item not found"));
@@ -56,22 +55,22 @@ public class BookingServiceImpl implements BookingService {
             throw new ConflictException("Item is already booked for this period");
         }
 
-        Booking booking = new Booking();
-        booking.setStart(dto.getStart());
-        booking.setEnd(dto.getEnd());
-        booking.setItem(item);
-        booking.setBooker(user);
-        booking.setStatus(Status.WAITING);
+        Booking booking = BookingMapper.toBooking(dto, item, user);
 
         return BookingMapper.toDto(bookingRepository.save(booking));
     }
 
     @Override
     public BookingResponseDto approve(Long userId, Long bookingId, Boolean approved) {
+        findUserOrThrow(userId);
+
         Booking booking = bookingRepository.findByIdWithRelations(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
 
-        if (!booking.getItem().getOwner().getId().equals(userId)) {
+        Long ownerId = booking.getItem() != null && booking.getItem().getOwner() != null
+                ? booking.getItem().getOwner().getId() : null;
+
+        if (!userId.equals(ownerId)) {
             throw new AccessDeniedException("Only owner can approve booking");
         }
 
@@ -108,42 +107,44 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private List<BookingResponseDto> getBookingByStateForBooker(Long userId, State state) {
-
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        findUserOrThrow(userId);
+        Sort sort = getDefaultSort();
         LocalDateTime now = LocalDateTime.now();
 
         List<Booking> bookings = switch (state) {
-            case ALL -> bookingRepository.findByBooker_Id(userId, sort);
-            case CURRENT -> bookingRepository.findByBooker_IdAndStartBeforeAndEndAfter(userId, now, now, sort);
-            case PAST -> bookingRepository.findByBooker_IdAndEndBefore(userId, now, sort);
-            case FUTURE -> bookingRepository.findByBooker_IdAndStartAfter(userId, now, sort);
-            case WAITING -> bookingRepository.findByBooker_IdAndStatus(userId, Status.WAITING, sort);
-            case REJECTED -> bookingRepository.findByBooker_IdAndStatus(userId, Status.REJECTED, sort);
+            case ALL -> bookingRepository.findByBookerId(userId, sort);
+            case CURRENT -> bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(userId, now, now, sort);
+            case PAST -> bookingRepository.findByBookerIdAndEndBefore(userId, now, sort);
+            case FUTURE -> bookingRepository.findByBookerIdAndStartAfter(userId, now, sort);
+            case WAITING -> bookingRepository.findByBookerIdAndStatus(userId, Status.WAITING, sort);
+            case REJECTED -> bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, sort);
         };
         return bookings.stream().map(BookingMapper::toDto).toList();
     }
 
     private List<BookingResponseDto> getBookingsByStateForOwner(Long userId, State state) {
-
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        findUserOrThrow(userId);
+        Sort sort = getDefaultSort();
         LocalDateTime now = LocalDateTime.now();
 
         List<Booking> bookings = switch (state) {
-            case ALL -> bookingRepository.findByItem_Owner_Id(userId, sort);
-            case CURRENT -> bookingRepository.findByItem_Owner_IdAndStartBeforeAndEndAfter(userId, now, now, sort);
-            case PAST -> bookingRepository.findByItem_Owner_IdAndEndBefore(userId, now, sort);
-            case FUTURE -> bookingRepository.findByItem_Owner_IdAndStartAfter(userId, now, sort);
-            case WAITING -> bookingRepository.findByItem_Owner_IdAndStatus(userId, Status.WAITING, sort);
-            case REJECTED -> bookingRepository.findByItem_Owner_IdAndStatus(userId, Status.REJECTED, sort);
+            case ALL -> bookingRepository.findByItemOwnerId(userId, sort);
+            case CURRENT -> bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfter(userId, now, now, sort);
+            case PAST -> bookingRepository.findByItemOwnerIdAndEndBefore(userId, now, sort);
+            case FUTURE -> bookingRepository.findByItemOwnerIdAndStartAfter(userId, now, sort);
+            case WAITING -> bookingRepository.findByItemOwnerIdAndStatus(userId, Status.WAITING, sort);
+            case REJECTED -> bookingRepository.findByItemOwnerIdAndStatus(userId, Status.REJECTED, sort);
         };
         return bookings.stream().map(BookingMapper::toDto).toList();
     }
 
+    private User findUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+    }
+
+    private Sort getDefaultSort() {
+        return Sort.by(Sort.Direction.DESC, "start");
+    }
 
 }

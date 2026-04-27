@@ -26,7 +26,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemOwnerDto> getItems(long userId) {
-        return itemRepository.findByOwner_Id(userId)
+        return itemRepository.findByOwnerId(userId)
                 .stream()
                 .map(this::enrich)
                 .toList();
@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
         ItemOwnerDto dto = enrich(item);
 
         List<CommentDto> comments = commentRepository
-                .findByItem_IdOrderByCreatedDesc(itemId)
+                .findByItemIdOrderByCreatedDesc(itemId)
                 .stream()
                 .map(CommentMapper::toDto)
                 .toList();
@@ -123,7 +123,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Item not found"));
 
         boolean hasBooking = bookingRepository
-                .existsByItem_IdAndBooker_IdAndEndBefore(itemId, userId, LocalDateTime.now());
+                .existsByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
 
         if (!hasBooking) {
             throw new IllegalArgumentException("User has not booked this item");
@@ -143,15 +143,15 @@ public class ItemServiceImpl implements ItemService {
         LocalDateTime now = LocalDateTime.now();
 
         Booking last = bookingRepository
-                .findTopByItem_IdAndStartBeforeOrderByStartDesc(item.getId(), now)
+                .findTopByItemIdAndStartBeforeOrderByStartDesc(item.getId(), now)
                 .orElse(null);
 
         Booking next = bookingRepository
-                .findTopByItem_IdAndStartAfterOrderByStartAsc(item.getId(), now)
+                .findTopByItemIdAndStartAfterOrderByStartAsc(item.getId(), now)
                 .orElse(null);
 
         List<CommentDto> comments = commentRepository
-                .findByItem_IdOrderByCreatedDesc(item.getId())
+                .findByItemIdOrderByCreatedDesc(item.getId())
                 .stream()
                 .map(CommentMapper::toDto)
                 .toList();
@@ -169,6 +169,5 @@ public class ItemServiceImpl implements ItemService {
         dto.setComments(comments);
 
         return dto;
-
     }
 }
