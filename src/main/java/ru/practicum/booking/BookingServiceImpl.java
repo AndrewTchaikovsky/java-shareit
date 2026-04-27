@@ -34,10 +34,6 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("Start must be before end");
         }
 
-        if (dto.getStart().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Start must not be in the past");
-        }
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
