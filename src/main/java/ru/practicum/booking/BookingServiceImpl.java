@@ -62,7 +62,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto approve(Long userId, Long bookingId, Boolean approved) {
-        findUserOrThrow(userId);
 
         Booking booking = bookingRepository.findByIdWithRelations(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found"));
