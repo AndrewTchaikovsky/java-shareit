@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
@@ -14,17 +13,14 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getItems(userId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemOwnerDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.getItems(userId);
     }
 
     @PostMapping
     public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                            @Valid @RequestBody ItemDto itemDto) {
-        Item item = ItemMapper.toItem(itemDto);
-        return ItemMapper.toItemDto(itemService.addNewItem(userId, item));
+        return itemService.addNewItem(userId, itemDto);
     }
 
     @DeleteMapping("/{itemId}")
@@ -36,18 +32,26 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto);
-        return ItemMapper.toItemDto(itemService.updateItem(userId, itemId, item));
+        return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId) {
-        return ItemMapper.toItemDto(itemService.getItemById(itemId));
+    public ItemOwnerDto getItem(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                @PathVariable Long itemId) {
+        return itemService.getItemById(userId, itemId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestParam String text) {
-        return itemService.searchItems(text).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemService.searchItems(text);
     }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long itemId,
+            @RequestBody CommentDto dto) {
+        return itemService.addComment(userId, itemId, dto.getText());
+    }
+
 }
